@@ -146,24 +146,35 @@ myvars <- c("Price", "Mileage", "convertible", "coupe", "hatchback", "sedan", "w
 carSubset <- df_cars[myvars]
 head(carSubset)
 
-carSubset$convertible[carSubset$convertible == 1] <- 'convertible'
-carSubset$coupe[carSubset$coupe == 1] <- 'coupe'
-carSubset$hatchback[carSubset$hatchback == 1] <- 'hatchback'
-carSubset$sedan[carSubset$sedan == 1] <- 'sedan'
-carSubset$wagon[carSubset$wagon == 1] <- 'wagon'
+# Sum values of Raster objects by row or column.
+rowSums(carSubset[,3:7]) # all 1, so only one type per car
 
-library(dplyr)
+# Functions to get or set the names of an object.
+# Grabs the names that will be used to replace the 1 values.
+nm <- names(carSubset[,3:7])
 
-x <- carSubset %>%
-  mutate(Type = case_when(convertible == 'convertible' ~ 'convertible',
-                          coupe == 'coupe' ~ 'coupe',
-                          hatchback == 'hatchback' ~ 'hatchback',
-                          sedan == 'sedan' ~ 'sedan',
-                          wagon == 'wagon' ~ 'wagon'))
+# Create a vector to hold the type of car based on 0,1 values
+type <- vector("character", length = nrow(carSubset))
+
+# the data of interest - specific car types
+dat <- carSubset[,3:7] # carSubset
+
+# loop through each row of data
+for (i in 1:nrow(dat)) {
+  # loop through each column of the row
+  for(j in 1:5) {
+    # if this column is equivalent to 1, then assign 
+    # name stripped from header and stored in nm
+    if (dat[i,j] == 1) type[i] <- nm[j] 
+  }
+}  
+
+# join the type column to the dataframe
+carSubset$Type <- type
 
 # select variables price, mileage, and car type
 myvars <- c("Price", "Mileage", "Type")
-carSubset <- x[myvars]
+carSubset <- carSubset[myvars]
 head(carSubset)
 
 levels(carSubset$Type)
